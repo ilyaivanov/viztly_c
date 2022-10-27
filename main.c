@@ -31,8 +31,7 @@ int main(int argc, char* argv[])
 {
     SDL_Init(SDL_INIT_VIDEO);
 	TTF_Init();
-
-	TTF_Font*  font = TTF_OpenFont("C:/Windows/Fonts/segoeui.ttf", 28);
+	TTF_Font*  font = TTF_OpenFont("fonts/OpenSans-Regular.ttf", 28);
 
 	
     SDL_CreateWindowAndRenderer(512, 512, 0, &window, &renderer);
