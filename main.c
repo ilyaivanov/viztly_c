@@ -2,68 +2,88 @@
 #include <SDL_ttf.h>
 #include <stdlib.h>
 
-SDL_Window* window;
-SDL_Renderer* renderer;
-SDL_Surface* surface;
+SDL_Window *window;
+SDL_Renderer *renderer;
 
 int isRunning = 0;
 
 void handleEvents();
 
-SDL_Texture* text_texture;
-SDL_Rect text_dest = { 0 };
+SDL_Texture *text_texture;
+SDL_Rect text_dest = {0};
+
+SDL_Color fontColor = {255, 255, 255};
+SDL_Color bg = {30, 30, 30};
+SDL_Rect screenDimensions = {0, 0, 512, 512};
+
+int left = 40;
+int top = 40;
+int inBetweenItems = 20;
+
+int squareLeftRightMargin = 7;
+int squareSize = 8;
+SDL_Color squareColor = {255, 255, 255};
 
 void draw()
 {
-    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-    SDL_Rect rect = { 20, 20, 40, 40 };
-    SDL_RenderFillRect(renderer, &rect);
+	SDL_SetRenderDrawColor(renderer, bg.r, bg.g, bg.b, 255);
+	SDL_RenderFillRect(renderer, &screenDimensions);
+
+	SDL_SetRenderDrawColor(renderer, squareColor.r, squareColor.g, squareColor.b, 255);
+	SDL_Rect rectPosition = {left + squareLeftRightMargin, top, squareSize, squareSize};
+	SDL_RenderFillRect(renderer, &rectPosition);
 
 	SDL_RenderCopy(renderer, text_texture, NULL, &text_dest);
 
 	SDL_RenderPresent(renderer);
 }
 
-
-
-
-int main(int argc, char* argv[])
+void init()
 {
-    SDL_Init(SDL_INIT_VIDEO);
+	TTF_Font *segoefont = TTF_OpenFont("fonts/seguisb.ttf", 16);
+
+	SDL_Color txtBg = bg;
+	SDL_Surface *text = TTF_RenderText_LCD(segoefont, "Electro", fontColor, txtBg);
+
+	int ascent = TTF_FontAscent(segoefont);
+
+	text_texture = SDL_CreateTextureFromSurface(renderer, text);
+
+	text_dest.x = left + squareLeftRightMargin * 2 + squareSize;
+	// text_dest.y = top - ((text->h - squareSize) / 2);
+	text_dest.y = top - (ascent / 2);
+	text_dest.w = text->w;
+	text_dest.h = text->h;
+
+	TTF_CloseFont(segoefont);
+
+	SDL_FreeSurface(text);
+}
+
+int main(int argc, char *argv[])
+{
+	SDL_Init(SDL_INIT_VIDEO);
 	TTF_Init();
-	TTF_Font*  font = TTF_OpenFont("fonts/OpenSans-Regular.ttf", 28);
 
-	
-    SDL_CreateWindowAndRenderer(512, 512, 0, &window, &renderer);
+	SDL_CreateWindowAndRenderer(512, 512, 0, &window, &renderer);
 
-	if (renderer) {
+	if (renderer)
+	{
 		SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
 		isRunning = 1;
-
-		text_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, 400, 400);
-		SDL_Surface* text;
-		SDL_Color color = { 255, 255, 255 };
-		SDL_Color bgcolor = { 0, 0, 0 };
-
-		text = TTF_RenderText_LCD(font, "Hello, World!", color, bgcolor);
-
-		text_texture = SDL_CreateTextureFromSurface(renderer, text);
-
-		text_dest.x = 200;
-		text_dest.y = 200;
-		text_dest.w = text->w;
-		text_dest.h = text->h;
+		init();
 	}
 
-
-    while (isRunning)
-    {
-        handleEvents();
-        draw();
-    }
+	while (isRunning)
+	{
+		handleEvents();
+		draw();
+	}
 
 	SDL_DestroyRenderer(renderer);
-	SDL_DestroyWindow(window); 
+	SDL_DestroyWindow(window);
+
+	TTF_Quit();
 	SDL_Quit();
 
 	return 0;
